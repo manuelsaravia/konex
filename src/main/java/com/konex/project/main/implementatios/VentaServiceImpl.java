@@ -16,9 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class VentaServiceImpl implements VentaService {
@@ -119,6 +119,43 @@ public class VentaServiceImpl implements VentaService {
 
     @Override
     public List<FacturaDTO> getByFechas(String fechaIni, String fechaFin) {
-       return null;
+        try{
+            SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd");
+            Date ini = formatter.parse(fechaIni);
+            Date fin = formatter.parse(fechaFin);
+            List<Venta> ventas = ventaRepository.findBetweenDates(ini, fin);
+            if(ventas != null && !ventas.isEmpty()){
+                Map<Long, FacturaDTO> map = new HashMap<>();
+                for(Venta venta: ventas){
+                    if(!map.containsKey(venta.getFactura().getConsecutivo())){
+                        FacturaDTO facturaDTO = new FacturaDTO();
+                        facturaDTO.setConsecutivo(venta.getFactura().getConsecutivo());
+                        facturaDTO.setFecha(venta.getFactura().getFecha());
+                        facturaDTO.setCliente(venta.getFactura().getCliente());
+                        facturaDTO.setDetalle(new ArrayList<>());
+                        facturaDTO.setTotalAPagar(0);
+                        map.put(venta.getFactura().getConsecutivo(), facturaDTO);
+                    }
+                    VentaDTO ventaDTO = new VentaDTO();
+                    ventaDTO.setIdentificador(venta.getId());
+                    ventaDTO.setCodigoMedicamento(venta.getMedicamento().getCodigo());
+                    ventaDTO.setNombreMedicamento(venta.getMedicamento().getNombre());
+                    ventaDTO.setCantidad(venta.getCantidad());
+                    ventaDTO.setValorUnitario(venta.getMedicamento().getPrecio());
+                    ventaDTO.setValorTotal(venta.getCantidad() * venta.getMedicamento().getPrecio());
+
+                    FacturaDTO aux = map.get(venta.getFactura().getConsecutivo());
+
+                    aux.getDetalle().add(ventaDTO);
+                    aux.setTotalAPagar(aux.getTotalAPagar()+ventaDTO.getValorTotal());
+                    map.put(venta.getFactura().getConsecutivo(), aux);
+                }
+
+                return map.values().stream().map(dto -> {return dto;}).collect(Collectors.toList());
+            }
+            return new ArrayList<>();
+        }catch(Exception e){
+            return null;
+        }
     }
 }

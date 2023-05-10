@@ -62,6 +62,9 @@ public class VentaController {
     }
 
 
-
+    @GetMapping("fechaInicial/{fechaIni}/fechaFinal/{fechaFin}")
+    public ResponseEntity<?> getByFechas(@PathVariable("fechaIni") String fechaIni, @PathVariable("fechaFin") String fechaFin){
+        return new ResponseEntity<>(service.getByFechas(fechaIni,fechaFin),HttpStatus.OK);
+    }
 
 }
