@@ -9,11 +9,8 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VentaDTO implements Serializable {
-    private Long identificador;
-    private Long codigoMedicamento;
-    private String nombreMedicamento;
+public class DetalleCompraDTO implements Serializable {
+
+    private int codigoMedicamento;
     private int cantidad;
-    private double valorUnitario;
-    private double valorTotal;
 }

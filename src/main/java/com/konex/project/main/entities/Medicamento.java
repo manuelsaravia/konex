@@ -18,7 +18,7 @@ public class Medicamento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long codigo;
 
-    @Column
+    @Column(unique = true)
     private String nombre;
 
     @Column
